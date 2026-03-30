@@ -5,379 +5,398 @@
 }
 
 body {
-    font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
     min-height: 100vh;
-    color: #eee;
 }
 
-.game-container {
-    max-width: 1200px;
+.container {
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* Header */
-header {
+/* 設定畫面 */
+.setup-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.setup-panel h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    color: #222;
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.mode-btn:hover {
+    border-color: #2196F3;
+}
+
+.mode-btn.active {
+    border-color: #2196F3;
+    background: #E3F2FD;
+}
+
+.mode-btn h4 {
+    margin-bottom: 4px;
+    color: #2196F3;
+}
+
+.mode-btn p {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.settings-form {
+    display: none;
+}
+
+.settings-form.show {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+.unit-costs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.start-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.start-btn:hover {
+    background: #1976D2;
+}
+
+/* 遊戲畫面 */
+.game-panel {
+    display: none;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.game-panel.show {
+    display: block;
+}
+
+/* 頂部狀態列 */
+.status-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 20px 30px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    border: 2px solid #e94560;
-    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+    padding: 16px 24px;
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-header h1 {
-    font-size: 2rem;
-    color: #e94560;
-    text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
-}
-
-.gold-display {
+.status-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: linear-gradient(145deg, #ffd700, #ffb700);
-    padding: 10px 25px;
-    border-radius: 50px;
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+    gap: 8px;
 }
 
-.gold-icon {
-    font-size: 1.8rem;
+.status-item .label {
+    color: #666;
+    font-size: 0.9rem;
 }
 
-.gold-amount {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #1a1a2e;
+.status-item .value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2196F3;
 }
 
-.gold-label {
-    font-size: 1rem;
-    color: #333;
-    font-weight: bold;
-}
-
-/* Round Info */
-.round-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 25px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 10px;
-}
-
-.round-info h2 {
-    font-size: 1.5rem;
-    color: #00d9ff;
-}
-
-#roundNum {
-    color: #e94560;
-    font-size: 2rem;
-}
-
-.btn-primary {
-    background: linear-gradient(145deg, #e94560, #c13651);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    font-size: 1.1rem;
-    border-radius: 8px;
+.reset-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3);
+    font-size: 0.9rem;
+    color: #666;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5);
+.reset-btn:hover {
+    border-color: #999;
+    color: #333;
 }
 
-.btn-primary:active {
-    transform: translateY(0);
+/* 主要內容區 */
+.game-content {
+    padding: 24px;
 }
 
-/* Main Content */
-.main-content {
+/* 兵營區域 */
+.barracks-area {
     display: grid;
-    grid-template-columns: 1fr 300px 1fr;
-    gap: 25px;
-    margin-bottom: 25px;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
 }
 
-/* Barracks */
 .barrack {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     padding: 20px;
-    border: 2px solid #0f3460;
-    transition: all 0.3s ease;
-}
-
-.barrack:hover {
-    border-color: #e94560;
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.2);
+    background: #fafafa;
 }
 
 .barrack-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 16px;
 }
 
 .barrack-header h3 {
-    font-size: 1.3rem;
-    color: #00d9ff;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
-.queue-count {
-    background: rgba(0, 217, 255, 0.2);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-}
-
-/* Queue Slots */
-.queue-container {
-    margin-bottom: 20px;
+.queue-status {
+    font-size: 0.85rem;
+    color: #666;
 }
 
 .queue-slots {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
-.slot {
-    height: 60px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+.queue-slot {
+    height: 48px;
+    background: white;
+    border: 2px dashed #ddd;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    font-size: 0.95rem;
 }
 
-.slot.filled {
-    background: linear-gradient(145deg, #0f3460, #1a4a7a);
+.queue-slot.filled {
     border-style: solid;
-    border-color: #00d9ff;
-    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+    border-color: #2196F3;
+    background: #E3F2FD;
 }
 
-.unit-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1rem;
-}
-
-.unit-card .icon {
-    font-size: 1.5rem;
-}
-
-/* Production Area */
-.production-area {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 15px;
+.output-area {
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
     text-align: center;
-}
-
-.output-slot {
-    min-height: 60px;
+    min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    transition: all 0.3s ease;
 }
 
-.output-slot.producing {
-    border-color: #ffd700;
-    background: rgba(255, 215, 0, 0.1);
-    animation: pulse 1s infinite;
-}
-
-.output-slot.completed {
-    border-color: #00ff88;
-    background: rgba(0, 255, 136, 0.2);
-}
-
-.empty-text {
-    color: rgba(255, 255, 255, 0.4);
+.output-area.idle {
+    color: #999;
     font-size: 0.9rem;
 }
 
-@keyframes pulse {
-    0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-    50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+.output-area.producing {
+    color: #FF9800;
+    font-weight: 500;
 }
 
-/* Control Panel */
-.control-panel {
-    background: rgba(233, 69, 96, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    border: 2px solid #e94560;
+.output-area.completed {
+    color: #4CAF50;
+    font-weight: 600;
 }
 
-.control-panel h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #e94560;
+/* 控制區域 */
+.controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
 }
 
 .unit-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.unit-btn {
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+}
+
+.unit-btn:hover:not(:disabled) {
+    border-color: #2196F3;
+    background: #fafafa;
+}
+
+.unit-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.unit-btn .name {
+    font-weight: 500;
+    display: block;
+}
+
+.unit-btn .cost {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.round-controls {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.unit-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.unit-btn:hover:not(:disabled) {
-    background: linear-gradient(145deg, #e94560, #c13651);
-    border-color: #e94560;
-    transform: translateX(5px);
-}
-
-.unit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.unit-btn .unit-icon {
-    font-size: 1.8rem;
-}
-
-.unit-btn .unit-name {
+.next-round-btn {
     flex: 1;
-    font-size: 1.1rem;
-    font-weight: bold;
+    padding: 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
 }
 
-.unit-btn .unit-cost {
-    background: rgba(255, 215, 0, 0.2);
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    color: #ffd700;
+.next-round-btn:hover {
+    background: #43A047;
 }
 
-/* Log Panel */
-.log-panel {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    padding: 20px;
-    border: 2px solid #0f3460;
+/* 日誌區域 */
+.log-area {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
 }
 
-.log-panel h3 {
-    margin-bottom: 15px;
-    color: #00d9ff;
-    padding-bottom: 10px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+.log-area h4 {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    color: #555;
 }
 
 .log-content {
-    max-height: 200px;
+    max-height: 180px;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    background: #fafafa;
+    padding: 12px 16px;
+    border-radius: 6px;
 }
 
 .log-entry {
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    animation: slideIn 0.3s ease;
+    padding: 2px 0;
+    border-bottom: 1px solid #eee;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.log-entry:last-child {
+    border-bottom: none;
 }
 
-.log-entry.system {
-    background: rgba(0, 217, 255, 0.1);
-    border-left: 4px solid #00d9ff;
+.log-entry.round {
+    color: #2196F3;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.log-entry.round:first-child {
+    margin-top: 0;
 }
 
 .log-entry.success {
-    background: rgba(0, 255, 136, 0.1);
-    border-left: 4px solid #00ff88;
+    color: #4CAF50;
 }
 
 .log-entry.error {
-    background: rgba(233, 69, 96, 0.1);
-    border-left: 4px solid #e94560;
+    color: #f44336;
 }
 
 .log-entry.warning {
-    background: rgba(255, 193, 7, 0.1);
-    border-left: 4px solid #ffc107;
+    color: #FF9800;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-    .main-content {
+@media (max-width: 600px) {
+    .barracks-area {
         grid-template-columns: 1fr;
     }
     
-    header {
-        flex-direction: column;
-        gap: 15px;
+    .controls {
+        grid-template-columns: 1fr;
     }
     
-    header h1 {
-        font-size: 1.5rem;
-    }
-}
-
-/* Animation for unit production */
-.unit-appear {
-    animation: unitAppear 0.5s ease;
-}
-
-@keyframes unitAppear {
-    0% {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1) rotate(0);
-        opacity: 1;
+    .mode-buttons {
+        flex-direction: column;
     }
 }

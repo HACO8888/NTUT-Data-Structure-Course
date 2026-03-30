@@ -1,48 +1,133 @@
+// 預設設定
+const DEFAULT_SETTINGS = {
+    gold: 150,
+    capacity: 2,
+    units: {
+        '劍士': 20,
+        '弓手': 30,
+        '騎士': 50,
+        '投石車': 40
+    }
+};
+
+// 單位圖示
+const UNIT_ICONS = {
+    '劍士': '⚔️',
+    '弓手': '🏹',
+    '騎士': '🐴',
+    '投石車': '🪨'
+};
+
 // 遊戲狀態
 let gameState = {
-    gold: 150,
+    settings: null,
+    gold: 0,
     round: 0,
     barracksA: [],
     barracksB: []
 };
 
-// 單位資料
-const units = {
-    '劍士': { icon: '⚔️', cost: 20 },
-    '弓手': { icon: '🏹', cost: 30 },
-    '騎士': { icon: '🐴', cost: 50 },
-    '投石車': { icon: '🪨', cost: 40 }
-};
+// 當前選擇的模式
+let currentMode = 'preset';
 
-// DOM 元素
-const goldAmountEl = document.getElementById('goldAmount');
-const roundNumEl = document.getElementById('roundNum');
-const nextRoundBtn = document.getElementById('nextRoundBtn');
-const logContent = document.getElementById('logContent');
+// 選擇模式
+function selectMode(mode) {
+    currentMode = mode;
+    document.getElementById('presetMode').classList.toggle('active', mode === 'preset');
+    document.getElementById('customMode').classList.toggle('active', mode === 'custom');
+    document.getElementById('settingsForm').classList.toggle('show', mode === 'custom');
+    document.getElementById('presetInfo').style.display = mode === 'preset' ? 'block' : 'none';
+}
 
-// 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    updateDisplay();
-    bindEvents();
-});
+// 開始遊戲
+function startGame() {
+    // 取得設定
+    if (currentMode === 'preset') {
+        gameState.settings = { ...DEFAULT_SETTINGS };
+    } else {
+        gameState.settings = {
+            gold: parseInt(document.getElementById('initialGold').value) || 150,
+            capacity: parseInt(document.getElementById('queueCapacity').value) || 2,
+            units: {
+                '劍士': parseInt(document.getElementById('costSword').value) || 20,
+                '弓手': parseInt(document.getElementById('costArcher').value) || 30,
+                '騎士': parseInt(document.getElementById('costKnight').value) || 50,
+                '投石車': parseInt(document.getElementById('costCatapult').value) || 40
+            }
+        };
+    }
 
-// 綁定事件
-function bindEvents() {
-    // 生產按鈕
-    document.querySelectorAll('.unit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const unit = btn.dataset.unit;
-            const cost = parseInt(btn.dataset.cost);
-            placeOrder(unit, cost);
-        });
+    // 初始化遊戲狀態
+    gameState.gold = gameState.settings.gold;
+    gameState.round = 0;
+    gameState.barracksA = [];
+    gameState.barracksB = [];
+
+    // 更新容量顯示
+    document.querySelectorAll('.capacity').forEach(el => {
+        el.textContent = gameState.settings.capacity;
     });
 
-    // 下一回合按鈕
-    nextRoundBtn.addEventListener('click', nextRound);
+    // 生成佇列格子
+    generateQueueSlots();
+
+    // 生成單位按鈕
+    generateUnitButtons();
+
+    // 切換畫面
+    document.getElementById('setupPanel').style.display = 'none';
+    document.getElementById('gamePanel').classList.add('show');
+
+    // 更新顯示
+    updateDisplay();
+    addLog('遊戲開始！');
+}
+
+// 生成佇列格子
+function generateQueueSlots() {
+    const capacity = gameState.settings.capacity;
+    
+    ['A', 'B'].forEach(barrack => {
+        const container = document.getElementById(`queue${barrack}`);
+        container.innerHTML = '';
+        for (let i = 0; i < capacity; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'queue-slot';
+            slot.id = `slot${barrack}${i}`;
+            container.appendChild(slot);
+        }
+    });
+}
+
+// 生成單位按鈕
+function generateUnitButtons() {
+    const container = document.getElementById('unitButtons');
+    container.innerHTML = '';
+    
+    Object.entries(gameState.settings.units).forEach(([unit, cost]) => {
+        const btn = document.createElement('button');
+        btn.className = 'unit-btn';
+        btn.onclick = () => placeOrder(unit);
+        btn.innerHTML = `
+            <span class="name">${UNIT_ICONS[unit]} ${unit}</span>
+            <span class="cost">${cost} 金</span>
+        `;
+        container.appendChild(btn);
+    });
+}
+
+// 重新開始
+function resetGame() {
+    document.getElementById('gamePanel').classList.remove('show');
+    document.getElementById('setupPanel').style.display = 'block';
+    document.getElementById('logContent').innerHTML = '<div class="log-entry">遊戲開始！請下達生產指令。</div>';
 }
 
 // 下訂單
-function placeOrder(unit, cost) {
+function placeOrder(unit) {
+    const cost = gameState.settings.units[unit];
+    const capacity = gameState.settings.capacity;
+    
     // 檢查金額
     if (gameState.gold < cost) {
         addLog(`黃金不足 (剩:${gameState.gold})！取消生產 ${unit}`, 'error');
@@ -50,177 +135,148 @@ function placeOrder(unit, cost) {
     }
 
     // 檢查產線是否全滿
-    if (gameState.barracksA.length >= 2 && gameState.barracksB.length >= 2) {
+    if (gameState.barracksA.length >= capacity && gameState.barracksB.length >= capacity) {
         addLog(`產線全滿！${unit} 訂單被拒絕`, 'warning');
         return;
     }
 
-    // 負載平衡：選擇較空的兵營
-    let targetBarrack;
-    if (gameState.barracksA.length <= gameState.barracksB.length && gameState.barracksA.length < 2) {
-        targetBarrack = 'A';
+    // 負載平衡
+    if (gameState.barracksA.length <= gameState.barracksB.length && gameState.barracksA.length < capacity) {
         gameState.barracksA.push(unit);
-    } else if (gameState.barracksB.length < 2) {
-        targetBarrack = 'B';
-        gameState.barracksB.push(unit);
+        addLog(`${unit} 分派至 A 廠 (剩餘黃金: ${gameState.gold - cost})`, 'success');
     } else {
-        targetBarrack = 'A';
-        gameState.barracksA.push(unit);
+        gameState.barracksB.push(unit);
+        addLog(`${unit} 分派至 B 廠 (剩餘黃金: ${gameState.gold - cost})`, 'success');
     }
 
-    // 扣除金額
     gameState.gold -= cost;
-    
-    addLog(`${unit} 分派至 ${targetBarrack} 廠 (剩餘黃金: ${gameState.gold})`, 'success');
     updateDisplay();
-    animateUnitEntry(targetBarrack);
 }
 
 // 下一回合
-function nextRound() {
-    gameState.round++;
-    roundNumEl.textContent = gameState.round;
-    
-    addLog(`\n--- 第 ${gameState.round} 回合 ---`, 'system');
+document.getElementById('nextRoundBtn').addEventListener('click', () => {
+    addLog(`--- 第 ${gameState.round} 回合 ---`, 'round');
 
-    // 只在偶數回合生產
     if (gameState.round % 2 === 0) {
         processProduction();
     } else {
-        addLog('本回合為準備回合，不生產單位', 'system');
+        addLog('玩家本回合無動作，單純推進時間');
     }
 
+    gameState.round++;
     updateDisplay();
-}
+});
 
 // 處理生產
 function processProduction() {
-    // A 廠生產
+    const capacity = gameState.settings.capacity;
+    
+    // A 廠
     const outputA = document.getElementById('outputA');
     if (gameState.barracksA.length > 0) {
-        const unitA = gameState.barracksA.shift();
-        showProduction(outputA, unitA, 'A');
+        const unit = gameState.barracksA.shift();
+        showProduction(outputA, unit, 'A');
     } else {
         showUnderflow(outputA, 'A');
     }
 
-    // B 廠生產 (延遲一點顯示，有順序感)
-    setTimeout(() => {
-        const outputB = document.getElementById('outputB');
-        if (gameState.barracksB.length > 0) {
-            const unitB = gameState.barracksB.shift();
-            showProduction(outputB, unitB, 'B');
-        } else {
-            showUnderflow(outputB, 'B');
-        }
-        updateDisplay();
-    }, 300);
+    // B 廠
+    const outputB = document.getElementById('outputB');
+    if (gameState.barracksB.length > 0) {
+        const unit = gameState.barracksB.shift();
+        showProduction(outputB, unit, 'B');
+    } else {
+        showUnderflow(outputB, 'B');
+    }
+
+    updateDisplay();
 }
 
-// 顯示生產動畫
+// 顯示生產
 function showProduction(element, unit, barrackName) {
-    element.classList.add('producing');
-    element.innerHTML = '<span class="empty-text">生產中...</span>';
+    element.className = 'output-area producing';
+    element.textContent = '生產中...';
     
     setTimeout(() => {
-        element.classList.remove('producing');
-        element.classList.add('completed');
-        element.innerHTML = `
-            <div class="unit-card unit-appear">
-                <span class="icon">${units[unit].icon}</span>
-                <span>${unit} 完成!</span>
-            </div>
-        `;
+        element.className = 'output-area completed';
+        element.textContent = `${UNIT_ICONS[unit]} ${unit} 完成！`;
         addLog(`${barrackName} 廠生產完成：${unit} 出列！`, 'success');
         
-        // 3秒後清空
         setTimeout(() => {
-            element.classList.remove('completed');
-            element.innerHTML = '<span class="empty-text">等待生產...</span>';
-        }, 3000);
-    }, 800);
+            element.className = 'output-area idle';
+            element.textContent = '等待生產...';
+        }, 2000);
+    }, 500);
 }
 
-// 顯示 Underflow 訊息
+// 顯示 Underflow
 function showUnderflow(element, barrackName) {
-    element.innerHTML = '<span class="empty-text" style="color: #e94560;">⚠️ 無訂單</span>';
+    element.className = 'output-area';
+    element.style.color = '#f44336';
+    element.textContent = '⚠️ 無訂單';
     addLog(`${barrackName} 廠沒東西可做 (Underflow 防護成功)`, 'warning');
     
     setTimeout(() => {
-        element.innerHTML = '<span class="empty-text">等待生產...</span>';
-    }, 2000);
+        element.className = 'output-area idle';
+        element.style.color = '';
+        element.textContent = '等待生產...';
+    }, 1500);
 }
 
-// 更新畫面
+// 更新顯示
 function updateDisplay() {
-    // 更新金額
-    goldAmountEl.textContent = gameState.gold;
-    
-    // 更新佇列計數
+    document.getElementById('goldAmount').textContent = gameState.gold;
+    document.getElementById('roundNum').textContent = gameState.round;
     document.getElementById('countA').textContent = gameState.barracksA.length;
     document.getElementById('countB').textContent = gameState.barracksB.length;
 
-    // 更新 A 廠佇列顯示
-    updateQueueSlots('A', gameState.barracksA);
-    
-    // 更新 B 廠佇列顯示
-    updateQueueSlots('B', gameState.barracksB);
+    // 更新佇列顯示
+    updateQueue('A', gameState.barracksA);
+    updateQueue('B', gameState.barracksB);
 
     // 更新按鈕狀態
-    updateButtonStates();
+    updateButtons();
 }
 
-// 更新佇列格子
-function updateQueueSlots(barrack, queue) {
-    for (let i = 0; i < 2; i++) {
+// 更新佇列顯示
+function updateQueue(barrack, queue) {
+    const capacity = gameState.settings.capacity;
+    for (let i = 0; i < capacity; i++) {
         const slot = document.getElementById(`slot${barrack}${i}`);
         if (queue[i]) {
-            slot.classList.add('filled');
-            slot.innerHTML = `
-                <div class="unit-card">
-                    <span class="icon">${units[queue[i]].icon}</span>
-                    <span>${queue[i]}</span>
-                </div>
-            `;
+            slot.className = 'queue-slot filled';
+            slot.textContent = `${UNIT_ICONS[queue[i]]} ${queue[i]}`;
         } else {
-            slot.classList.remove('filled');
-            slot.innerHTML = '';
+            slot.className = 'queue-slot';
+            slot.textContent = '';
         }
     }
 }
 
 // 更新按鈕狀態
-function updateButtonStates() {
-    document.querySelectorAll('.unit-btn').forEach(btn => {
-        const cost = parseInt(btn.dataset.cost);
+function updateButtons() {
+    const buttons = document.querySelectorAll('.unit-btn');
+    const unitNames = Object.keys(gameState.settings.units);
+    
+    buttons.forEach((btn, index) => {
+        const unit = unitNames[index];
+        const cost = gameState.settings.units[unit];
         btn.disabled = gameState.gold < cost;
     });
 }
 
 // 新增日誌
-function addLog(message, type = 'system') {
+function addLog(message, type = '') {
+    const content = document.getElementById('logContent');
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
     entry.textContent = message;
-    logContent.insertBefore(entry, logContent.firstChild);
+    content.insertBefore(entry, content.firstChild);
     
-    // 限制日誌數量
-    while (logContent.children.length > 50) {
-        logContent.removeChild(logContent.lastChild);
+    while (content.children.length > 30) {
+        content.removeChild(content.lastChild);
     }
 }
 
-// 單位進入動畫
-function animateUnitEntry(barrack) {
-    const queue = barrack === 'A' ? gameState.barracksA : gameState.barracksB;
-    const index = queue.length - 1;
-    if (index >= 0) {
-        const slot = document.getElementById(`slot${barrack}${index}`);
-        if (slot) {
-            slot.style.animation = 'none';
-            setTimeout(() => {
-                slot.style.animation = 'unitAppear 0.5s ease';
-            }, 10);
-        }
-    }
-}
+// 初始化
+selectMode('preset');

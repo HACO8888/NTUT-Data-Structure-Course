@@ -3,97 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>兵營生產系統 - Barracks Simulator</title>
+    <title>兵營生產系統</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <header>
-            <h1>🏰 兵營生產系統</h1>
-            <div class="gold-display">
-                <span class="gold-icon">💰</span>
-                <span class="gold-amount" id="goldAmount">150</span>
-                <span class="gold-label">黃金</span>
+    <div class="container">
+        <!-- 設定畫面 -->
+        <div class="setup-panel" id="setupPanel">
+            <h2>⚔️ 兵營生產系統</h2>
+            
+            <div class="mode-buttons">
+                <button class="mode-btn active" id="presetMode" onclick="selectMode('preset')">
+                    <h4>📋 預設模式</h4>
+                    <p>使用預設參數開始遊戲</p>
+                </button>
+                <button class="mode-btn" id="customMode" onclick="selectMode('custom')">
+                    <h4>⚙️ 自訂模式</h4>
+                    <p>修改初始參數</p>
+                </button>
             </div>
-        </header>
 
-        <div class="round-info">
-            <h2>第 <span id="roundNum">0</span> 回合</h2>
-            <button id="nextRoundBtn" class="btn-primary">▶ 推進回合</button>
+            <!-- 預設模式說明 -->
+            <div id="presetInfo" style="background: #f5f5f5; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+                <p><strong>預設參數：</strong></p>
+                <ul style="margin: 8px 0 0 20px; font-size: 0.9rem; color: #555;">
+                    <li>初始黃金：150</li>
+                    <li>兵營容量：2</li>
+                    <li>劍士：20金 / 弓手：30金 / 騎士：50金 / 投石車：40金</li>
+                </ul>
+            </div>
+
+            <!-- 自訂設定表單 -->
+            <div class="settings-form" id="settingsForm">
+                <div class="form-group">
+                    <label>初始黃金</label>
+                    <input type="number" id="initialGold" value="150" min="0">
+                </div>
+                <div class="form-group">
+                    <label>兵營佇列容量</label>
+                    <input type="number" id="queueCapacity" value="2" min="1" max="5">
+                </div>
+                <div class="form-group">
+                    <label>單位生產成本</label>
+                    <div class="unit-costs">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #777;">劍士</label>
+                            <input type="number" id="costSword" value="20" min="0">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #777;">弓手</label>
+                            <input type="number" id="costArcher" value="30" min="0">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #777;">騎士</label>
+                            <input type="number" id="costKnight" value="50" min="0">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #777;">投石車</label>
+                            <input type="number" id="costCatapult" value="40" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">開始遊戲</button>
         </div>
 
-        <div class="main-content">
-            <!-- 兵營 A -->
-            <div class="barrack" id="barrackA">
-                <div class="barrack-header">
-                    <h3>🏭 A 廠</h3>
-                    <span class="queue-count">佇列: <span id="countA">0</span>/2</span>
+        <!-- 遊戲畫面 -->
+        <div class="game-panel" id="gamePanel">
+            <!-- 狀態列 -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="label">回合</span>
+                    <span class="value" id="roundNum">0</span>
                 </div>
-                <div class="queue-container">
-                    <div class="queue-slots">
-                        <div class="slot" id="slotA0"></div>
-                        <div class="slot" id="slotA1"></div>
-                    </div>
+                <div class="status-item">
+                    <span class="label">黃金</span>
+                    <span class="value" id="goldAmount">150</span>
                 </div>
-                <div class="production-area">
-                    <div class="output-slot" id="outputA">
-                        <span class="empty-text">等待生產...</span>
-                    </div>
-                </div>
+                <button class="reset-btn" onclick="resetGame()">↺ 重新開始</button>
             </div>
 
-            <!-- 中央控制區 -->
-            <div class="control-panel">
-                <h3>📋 生產選單</h3>
-                <div class="unit-buttons">
-                    <button class="unit-btn" data-unit="劍士" data-cost="20">
-                        <span class="unit-icon">⚔️</span>
-                        <span class="unit-name">劍士</span>
-                        <span class="unit-cost">20 金</span>
-                    </button>
-                    <button class="unit-btn" data-unit="弓手" data-cost="30">
-                        <span class="unit-icon">🏹</span>
-                        <span class="unit-name">弓手</span>
-                        <span class="unit-cost">30 金</span>
-                    </button>
-                    <button class="unit-btn" data-unit="騎士" data-cost="50">
-                        <span class="unit-icon">🐴</span>
-                        <span class="unit-name">騎士</span>
-                        <span class="unit-cost">50 金</span>
-                    </button>
-                    <button class="unit-btn" data-unit="投石車" data-cost="40">
-                        <span class="unit-icon">🪨</span>
-                        <span class="unit-name">投石車</span>
-                        <span class="unit-cost">40 金</span>
-                    </button>
-                </div>
-            </div>
+            <!-- 遊戲內容 -->
+            <div class="game-content">
+                <!-- 兵營 -->
+                <div class="barracks-area">
+                    <div class="barrack">
+                        <div class="barrack-header">
+                            <h3>🏭 A 廠</h3>
+                            <span class="queue-status">佇列: <span id="countA">0</span> / <span class="capacity">2</span></span>
+                        </div>
+                        <div class="queue-slots" id="queueA">
+                            <!-- 動態生成 -->
+                        </div>
+                        <div class="output-area idle" id="outputA">
+                            等待生產...
+                        </div>
+                    </div>
 
-            <!-- 兵營 B -->
-            <div class="barrack" id="barrackB">
-                <div class="barrack-header">
-                    <h3>🏭 B 廠</h3>
-                    <span class="queue-count">佇列: <span id="countB">0</span>/2</span>
-                </div>
-                <div class="queue-container">
-                    <div class="queue-slots">
-                        <div class="slot" id="slotB0"></div>
-                        <div class="slot" id="slotB1"></div>
+                    <div class="barrack">
+                        <div class="barrack-header">
+                            <h3>🏭 B 廠</h3>
+                            <span class="queue-status">佇列: <span id="countB">0</span> / <span class="capacity">2</span></span>
+                        </div>
+                        <div class="queue-slots" id="queueB">
+                            <!-- 動態生成 -->
+                        </div>
+                        <div class="output-area idle" id="outputB">
+                            等待生產...
+                        </div>
                     </div>
                 </div>
-                <div class="production-area">
-                    <div class="output-slot" id="outputB">
-                        <span class="empty-text">等待生產...</span>
+
+                <!-- 控制區 -->
+                <div class="controls">
+                    <div class="unit-buttons" id="unitButtons">
+                        <!-- 動態生成 -->
+                    </div>
+                    <div class="round-controls">
+                        <button class="next-round-btn" id="nextRoundBtn">▶ 推進回合</button>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- 日誌區 -->
-        <div class="log-panel">
-            <h3>📜 系統日誌</h3>
-            <div class="log-content" id="logContent">
-                <div class="log-entry system">系統啟動完成！請開始生產單位。</div>
+                <!-- 日誌 -->
+                <div class="log-area">
+                    <h4>📜 系統日誌</h4>
+                    <div class="log-content" id="logContent">
+                        <div class="log-entry">遊戲開始！請下達生產指令。</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
