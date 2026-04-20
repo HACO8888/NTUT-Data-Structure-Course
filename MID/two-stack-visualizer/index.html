@@ -1,0 +1,125 @@
+<!-- 114AB0041 林杰陞 -->
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark" data-lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n-title="pageTitle">Two-Stack Queue 視覺化模擬器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text" data-i18n="title">Two-Stack Queue</span>
+        <span class="logo-bracket">]</span>
+      </h1>
+      <span class="logo-sub" data-i18n="subtitle">視覺化模擬器</span>
+    </div>
+    <div class="topbar-right">
+      <button class="toggle-btn" id="langToggle" aria-label="切換語言" data-i18n-aria="langAria">
+        <span class="toggle-label">中</span>
+        <div class="toggle-track">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="toggle-label">EN</span>
+      </button>
+      <button class="toggle-btn" id="themeToggle" aria-label="切換主題" data-i18n-aria="themeAria">
+        <span class="toggle-icon">&#9789;</span>
+        <div class="toggle-track">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="toggle-icon">&#9788;</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="stack-panel" id="stack1Panel">
+      <div class="panel-header">
+        <div class="panel-badge">S1</div>
+        <h2 class="panel-title" data-i18n="stack1Title">進件區</h2>
+        <span class="panel-count" id="s1Count">0</span>
+      </div>
+      <div class="stack-container" id="stack1Container">
+        <div class="stack-empty" data-i18n="empty">空</div>
+      </div>
+      <div class="panel-label" data-i18n="stack1Label">PUSH 從這裡進入</div>
+    </section>
+
+    <section class="control-column">
+      <div class="transfer-arrow" id="transferArrow">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <path d="M8 24H40M40 24L28 12M40 24L28 36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="arrow-label" data-i18n="transferLabel">倒轉搬移</span>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn ctrl-push" id="btnPush">
+          <span class="ctrl-btn-icon">+</span>
+          <span class="ctrl-btn-text">PUSH</span>
+        </button>
+        <button class="ctrl-btn ctrl-pop" id="btnPop">
+          <span class="ctrl-btn-icon">&minus;</span>
+          <span class="ctrl-btn-text">POP</span>
+        </button>
+        <button class="ctrl-btn ctrl-rec" id="btnRec">
+          <span class="rec-dot" id="recDot"></span>
+          <span class="ctrl-btn-text" id="recLabel" data-i18n="recStart">開始錄影</span>
+        </button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="totalLabel">佇列長度</span>
+          <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="opsLabel">操作次數</span>
+          <span class="stat-value" id="opsCount">0</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stack-panel" id="stack2Panel">
+      <div class="panel-header">
+        <div class="panel-badge badge-out">S2</div>
+        <h2 class="panel-title" data-i18n="stack2Title">出件區</h2>
+        <span class="panel-count" id="s2Count">0</span>
+      </div>
+      <div class="stack-container" id="stack2Container">
+        <div class="stack-empty" data-i18n="empty">空</div>
+      </div>
+      <div class="panel-label" data-i18n="stack2Label">POP 從這裡取出</div>
+    </section>
+  </main>
+
+  <section class="log-section">
+    <div class="log-header">
+      <h3 class="log-title" data-i18n="logTitle">操作紀錄</h3>
+      <button class="log-clear" id="btnClearLog" data-i18n="logClear">清除</button>
+    </div>
+    <div class="log-container" id="logContainer">
+      <div class="log-entry log-info">
+        <span class="log-time">--:--:--</span>
+        <span class="log-msg" data-i18n="logReady">系統就緒，按下 PUSH 開始操作</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>114AB0041 林杰陞</span>
+    <span class="footer-dot">&middot;</span>
+    <span data-i18n="footerText">資料結構期中考</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
